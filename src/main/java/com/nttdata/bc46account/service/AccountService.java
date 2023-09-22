@@ -4,6 +4,10 @@ import com.nttdata.bc46account.model.Account;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ * Ntt Data - Top Employer 2023.
+ * Todos los derechos Reservados.
+ */
 public interface AccountService {
   Flux<Account> findAll();
 

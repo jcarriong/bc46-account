@@ -11,8 +11,12 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ * Ntt Data - Top Employer 2023.
+ * Todos los derechos Reservados.
+ */
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/api")
 @Slf4j
 public class AccountController {
 
@@ -20,7 +24,7 @@ public class AccountController {
   private AccountService bankAccountService;
 
   /**
-   * Consultar todas las cuentas bancarias existentes
+   * Consultar todas las cuentas bancarias existentes.
    **/
   @GetMapping("/findAll")
   public Flux<Account> findAll() {
@@ -30,7 +34,7 @@ public class AccountController {
   }
 
   /**
-   * Consultar cuentas bancarias por idCustomer
+   * Consultar cuentas bancarias por idCustomer.
    **/
   @GetMapping("/findAccountsByCustomer/{idCustomer}")
   public Flux<Account> findByIdCustomer(@PathVariable("idCustomer") String idCustomer) {
@@ -39,7 +43,7 @@ public class AccountController {
   }
 
   /**
-   * Consultar cuenta bancaria por idAccount
+   * Consultar cuenta bancaria por idAccount.
    **/
   @GetMapping("/findById/{id}")
   public Mono<ResponseEntity<Account>> findById(@PathVariable("id") String id) {
@@ -51,7 +55,7 @@ public class AccountController {
   }
 
   /**
-   * Crear una cuenta bancaria de un producto relacionado
+   * Crear una cuenta bancaria de un producto relacionado.
    **/
   @PostMapping("/saveAccount")
   public Mono<ResponseEntity<Account>> save(@RequestBody Account bankAccount) {
@@ -63,7 +67,7 @@ public class AccountController {
   }
 
   /**
-   * Editar datos de una cuenta bancaria(se restringe la edición de llaves compuestas)
+   * Editar datos de una cuenta bancaria(se restringe la edición de llaves compuestas).
    **/
   @PutMapping("/updateAccountById/{idAccount}")
   public Mono<ResponseEntity<Account>> update(@RequestBody Account bankAccount,
@@ -75,7 +79,7 @@ public class AccountController {
   }
 
   /**
-   * Eliminar una cuenta bancaria del registro
+   * Eliminar una cuenta bancaria del registro.
    **/
   @DeleteMapping("/deleteCustomerById/{idAccount}")
   public Mono<ResponseEntity<Void>> deleteAccountById(@PathVariable(name = "idAccount")
