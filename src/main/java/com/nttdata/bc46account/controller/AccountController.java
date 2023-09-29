@@ -1,6 +1,7 @@
 package com.nttdata.bc46account.controller;
 
 import com.nttdata.bc46account.model.Account;
+import com.nttdata.bc46account.model.Movement;
 import com.nttdata.bc46account.service.AccountService;
 import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +64,7 @@ public class AccountController {
     bankAccount.setCreationDatetime(LocalDateTime.now());
     return bankAccountService.save(bankAccount)
         .map(bc -> new ResponseEntity<>(bc, HttpStatus.CREATED))
-        .defaultIfEmpty(new ResponseEntity<>(HttpStatus.CONFLICT));
+        .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
   /**
@@ -89,5 +90,17 @@ public class AccountController {
         .map(bankCustomer -> ResponseEntity.ok().<Void>build())
         .defaultIfEmpty(ResponseEntity.notFound().build());
 
+  }
+
+  /**
+   * Agregar un movimiento bancario -falta mejorar lógica
+   **/
+  @PostMapping("/addOperationToAccount/{idAccount}")
+  public Mono<ResponseEntity<Movement>> save(@PathVariable String idAccount,
+                                             @RequestBody Movement movement) {
+    log.info("A bank movement was inserted");
+    movement.setCreationDatetime(LocalDateTime.now());
+    return bankAccountService.addOperationToAccount(idAccount, movement)
+        .map(bc -> new ResponseEntity<>(bc, HttpStatus.CREATED));
   }
 }

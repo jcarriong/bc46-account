@@ -46,6 +46,12 @@
 			<artifactId>checkstyle</artifactId>
 			<version>10.9.1</version>
 		</dependency>
+
+		<dependency>
+			<groupId>io.github.wimdeblauwe</groupId>
+			<artifactId>error-handling-spring-boot-starter</artifactId>
+			<version>3.0.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -139,7 +145,7 @@
 				</configuration>
 				<executions>
 					<execution>
-						<phase>validate</phase>
+						<phase>install</phase>
 						<goals>
 							<goal>check</goal>
 						</goals>

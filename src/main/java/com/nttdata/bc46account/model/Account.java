@@ -23,6 +23,7 @@ public class Account extends BaseAuditDto {
 
   @Id
   private String idAccount;
+  private String accountType; //tipo de cuenta: personal | empresarial
   @NonNull
   private String idProduct;
   @NonNull
@@ -32,8 +33,8 @@ public class Account extends BaseAuditDto {
   @NonNull
   private String cci; //numero de cuenta interbancaria (20 digits)
   private Float availableBalance; //saldo disponible
-  private List<String> holderAccount; //cuenta titular 1.*
-  private List<String> authorizedSigner; //firmante autorizado 0.*
-  private List<String> bankMovements; //lista de movimientos bancarios
+  private List<Persona> holderAccount; //titular de la cuenta 1.*
+  private List<Persona> authorizedSigner; //firmante autorizado 0.4
+  private List<Movement> bankMovements; //lista de movimientos bancarios
 
 }
