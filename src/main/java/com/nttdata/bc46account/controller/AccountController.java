@@ -93,7 +93,12 @@ public class AccountController {
   }
 
   /**
-   * Agregar un movimiento bancario -falta mejorar lógica
+   * Agregar un movimiento bancario a una cuenta específica por IdAccount
+   * Operaciones:
+   * - Transferir dinero (TRANSFERIR_DINERO)
+   * - Pagar servicios (PAGAR_SERVICIOS)
+   * - Depositar (DEPOSITAR)
+   * - Cobrar giros (COBRAR_GIROS)
    **/
   @PostMapping("/addOperationToAccount/{idAccount}")
   public Mono<ResponseEntity<Movement>> save(@PathVariable String idAccount,
