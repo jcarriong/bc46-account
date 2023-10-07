@@ -57,14 +57,18 @@ public class AccountController {
 
   /**
    * Crear una cuenta bancaria de un producto relacionado.
+   * Requerimientos permitidos para generar una cuenta bancaria:
+   * - Un cliente personal solo puede tener un máximo de una cuenta de ahorro,
+   *   una cuenta corriente o cuentas a plazo fijo.
+   * - Un cliente empresarial no puede tener una cuenta de ahorro o de plazo fijo,
+   *   pero sí múltiples cuentas corrientes.
    **/
   @PostMapping("/saveAccount")
   public Mono<ResponseEntity<Account>> save(@RequestBody Account bankAccount) {
     log.info("A bank account was created");
     bankAccount.setCreationDatetime(LocalDateTime.now());
     return bankAccountService.save(bankAccount)
-        .map(bc -> new ResponseEntity<>(bc, HttpStatus.CREATED))
-        .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        .map(bc -> new ResponseEntity<>(bc, HttpStatus.CREATED));
   }
 
   /**
@@ -82,7 +86,7 @@ public class AccountController {
   /**
    * Eliminar una cuenta bancaria del registro.
    **/
-  @DeleteMapping("/deleteCustomerById/{idAccount}")
+  @DeleteMapping("/deleteAccountById/{idAccount}")
   public Mono<ResponseEntity<Void>> deleteAccountById(@PathVariable(name = "idAccount")
                                                       String idAccount) {
     log.info("A bank account was deleted");

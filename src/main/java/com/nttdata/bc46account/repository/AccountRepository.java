@@ -1,6 +1,7 @@
 package com.nttdata.bc46account.repository;
 
 import com.nttdata.bc46account.model.Account;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
@@ -15,4 +16,6 @@ public interface AccountRepository extends ReactiveMongoRepository<Account, Stri
   Flux<Account> findByIdCustomer(String idCustomer);
 
   Mono<Account> findByAccountNumber(String accountNumber);
+
+  Mono<Boolean> existsByIdCustomerAndIdProduct(String idCustomer, String idProduct);
 }

@@ -1,13 +1,17 @@
 package com.nttdata.bc46account.service;
 
 import com.nttdata.bc46account.exceptions.AccountNotFoundException;
+import com.nttdata.bc46account.exceptions.DuplicateAccountException;
+import com.nttdata.bc46account.exceptions.InvalidAccountTypeException;
 import com.nttdata.bc46account.model.Account;
 import com.nttdata.bc46account.model.Movement;
 import com.nttdata.bc46account.model.OperationType;
+import com.nttdata.bc46account.model.Persona;
 import com.nttdata.bc46account.repository.AccountRepository;
 import com.nttdata.bc46account.repository.MovementRepository;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,20 +61,74 @@ public class AccountImpl implements AccountService {
 
   @Override
   public Mono<Account> save(Account account) {
+    String idProduct = account.getIdProduct();
+    String accountType = account.getAccountType();
+
+
+    if ("empresarial".equals(accountType)) {
+      List<Persona> holders = account.getHolderAccount();
+      List<Persona> authorizedSigners = account.getAuthorizedSigner();
+
+      /**Verificar la cantidad de titulares; debe ser al menos 1.*/
+      if (holders == null || holders.isEmpty()) {
+        return Mono.error(new InvalidAccountTypeException("Debe haber al menos un titular para" +
+            " una cuenta empresarial"));
+      }
+
+      /**Verificar la cantidad de firmantes autorizados (máximo 4).*/
+      if (authorizedSigners != null && authorizedSigners.size() > 4) {
+        return Mono.error(new InvalidAccountTypeException("No se permiten más de 4 firmantes" +
+            " autorizados para una cuenta empresarial"));
+      }
+
+      if ("P001".equals(idProduct) || "P003".equals(idProduct)) {
+        return Mono.error(() ->
+            new InvalidAccountTypeException("Un cliente empresarial no puede tener una " +
+                "cuenta de ahorro o de plazo fijo."));
+      }
+    } else {
+      /** Verifica si el cliente ya tiene una cuenta del mismo tipo. */
+      return hasAccountOfType(account.getIdCustomer(), idProduct)
+          .flatMap(accountExists -> {
+            if (accountExists) {
+              /** Si Cliente ya tiene una cuenta del mismo tipo. */
+              return Mono.error(() ->
+                  new DuplicateAccountException("Un cliente personal solo puede tener un máximo de " +
+                      "una cuenta de ahorro, una cuenta corriente o cuentas a plazo fijo."));
+            } else {
+              /** Continúa con el registro de la cuenta */
+              return generateCustomId()
+                  .flatMap(a -> {
+                    account.setIdAccount(a);
+                    return accountRepository.save(account);
+                  });
+            }
+          });
+    }
+
+    /**Por último, si es cliente empresarial y no entra ninguna de las lógicas anteriores;
+     * pero sí múltiples cuentas corrientes continúa con el registro.*/
     return generateCustomId()
         .flatMap(a -> {
           account.setIdAccount(a);
           return accountRepository.save(account);
         });
+
   }
 
+  private Mono<Boolean> hasAccountOfType(String idCustomer, String idProduct) {
+    /** Utiliza el repositorio de cuentas para verificar si existe una cuenta con el mismo idCustomer e idProduct. */
+    return accountRepository.existsByIdCustomerAndIdProduct(idCustomer, idProduct);
+  }
+
+
   private Mono<String> generateCustomId() {
-    return accountRepository.count() // Contar la cantidad actual de documentos
+    return accountRepository.count() /** Contar la cantidad actual de documentos */
         .map(count -> {
           int nextNumber = count.intValue() + 1;
           return "A" + String.format("%04d", nextNumber);
         })
-        .defaultIfEmpty("A0001"); // Si no hay documentos, comenzar desde P001
+        .defaultIfEmpty("A0001"); // Si no hay documentos, comenzar desde A0001
   }
 
   @Override
@@ -116,7 +174,7 @@ public class AccountImpl implements AccountService {
 
   private Mono<Movement> processOperation(Account account, Movement movement) {
     String operation = movement.getOperation();
-    /** Permite validar si la operacion se encuentra en la lista de OperationType; */
+    /** Permite validar si la operación se encuentra en la lista de OperationType; */
     if (isValidOperation(operation)) {
       OperationType operationType = OperationType.valueOf(operation.toUpperCase());
 
@@ -129,7 +187,7 @@ public class AccountImpl implements AccountService {
 
   private boolean isValidOperation(String operation) {
     try {
-      OperationType.valueOf(operation.toUpperCase());
+      OperationType.valueOf(operation);
       return true;
 
     } catch (IllegalArgumentException e) {
