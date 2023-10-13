@@ -1,6 +1,7 @@
 package com.nttdata.bc46account.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "movement")
-public class Movement {
+public class Movement implements Serializable {
   @Id
   private String idMovement;
   private String operation; //Operaciones: Transferir dinero, Pagar servicios

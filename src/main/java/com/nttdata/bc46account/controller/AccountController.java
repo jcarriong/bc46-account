@@ -17,12 +17,13 @@ import reactor.core.publisher.Mono;
  * Todos los derechos Reservados.
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/accounts")
 @Slf4j
 public class AccountController {
 
   @Autowired
   private AccountService bankAccountService;
+
 
   /**
    * Consultar todas las cuentas bancarias existentes.
@@ -38,8 +39,9 @@ public class AccountController {
    * Consultar cuentas bancarias por idCustomer.
    **/
   @GetMapping("/findAccountsByCustomer/{idCustomer}")
+  /*  @CircuitBreaker(name = "accounts", fallbackMethod = "getAccountsByCustomerFallback")*/
   public Flux<Account> findByIdCustomer(@PathVariable("idCustomer") String idCustomer) {
-    log.info("Bank account was consulted by idCustomer");
+    log.info("The accounts were consulted by idCustomer " + idCustomer);
     return bankAccountService.findByIdCustomer(idCustomer);
   }
 

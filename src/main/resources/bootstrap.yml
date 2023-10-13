@@ -8,3 +8,7 @@ spring:
       uri: http://localhost:8888
       username: root
       password: s3cr3t
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092  # Por ejemplo, localhost:9092
+      group-id: cuentas-group

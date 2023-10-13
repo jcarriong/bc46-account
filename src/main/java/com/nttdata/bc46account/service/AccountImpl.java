@@ -7,6 +7,7 @@ import com.nttdata.bc46account.model.Account;
 import com.nttdata.bc46account.model.Movement;
 import com.nttdata.bc46account.model.OperationType;
 import com.nttdata.bc46account.model.Persona;
+import com.nttdata.bc46account.producer.EventKafkaProducer;
 import com.nttdata.bc46account.repository.AccountRepository;
 import com.nttdata.bc46account.repository.MovementRepository;
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,6 +32,12 @@ public class AccountImpl implements AccountService {
 
   @Autowired
   MovementRepository movementRepository;
+
+  private final EventKafkaProducer eventKafkaProducer;
+
+  public AccountImpl(EventKafkaProducer eventKafkaProducer) {
+    this.eventKafkaProducer = eventKafkaProducer;
+  }
 
   @Override
   public Flux<Account> findAll() {
@@ -250,7 +258,11 @@ public class AccountImpl implements AccountService {
             /** Actualiza ambas cuentas en la base de datos */
             return accountRepository.save(cuentaOrigen)
                 .then(accountRepository.save(destino))
-                .then(Mono.just(bankMovement));
+                .then(Mono.just(bankMovement))
+                .then(Mono.fromCallable(() -> {
+                  eventKafkaProducer.enviarMovimiento(bankMovement);
+                  return bankMovement;
+                }));
           } else {
             /** Si la cuenta de origen no tiene suficiente saldo, maneja el error aquí */
             return Mono.error(new RuntimeException("La cuenta de origen no tiene suficiente saldo para la transferencia."));
