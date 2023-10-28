@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -287,7 +286,11 @@ public class AccountImpl implements AccountService {
 
       /** Actualiza la cuenta en la base de datos */
       return accountRepository.save(account)
-          .then(Mono.just(movement));
+          .then(Mono.just(movement))
+          .then(Mono.fromCallable(() -> {
+            eventKafkaProducer.enviarMovimiento(movement);
+            return movement;
+          }));
     } else {
       return Mono.error(new RuntimeException("La cuenta no tiene suficiente saldo para el retiro."));
     }
